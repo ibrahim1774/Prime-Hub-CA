@@ -4,10 +4,28 @@ const VERCEL_API_TOKEN = "uDrB7AMqZisZk7s8noSD0ptF";
 const VERCEL_API_URL = "https://api.vercel.com";
 
 /**
+ * Convert base64 images to external URLs to reduce payload size
+ */
+const processImageUrl = (imageUrl: string): string => {
+  // If it's a base64 image, we need to use a placeholder or upload it separately
+  // For now, use high-quality unsplash placeholders
+  if (imageUrl.startsWith('data:image')) {
+    return 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&q=80&w=1200';
+  }
+  return imageUrl;
+};
+
+/**
  * Generate static HTML from site data
  */
 const generateStaticHTML = (data: GeneratedSiteData): string => {
   const { hero, services, repairBenefits, aboutUs, additionalBenefits, industryValue, faqs, contact } = data;
+
+  // Process images to avoid base64 encoding in HTML
+  const heroImage = processImageUrl(hero.heroImage);
+  const repairImage = processImageUrl(repairBenefits.image);
+  const aboutImage = processImageUrl(aboutUs.image);
+  const industryImage = industryValue ? processImageUrl(industryValue.valueImage) : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -34,7 +52,7 @@ const generateStaticHTML = (data: GeneratedSiteData): string => {
   </nav>
 
   <!-- Hero Section -->
-  <section class="relative pt-24 pb-20 min-h-[600px] flex items-center" style="background-image: url('${hero.heroImage}'); background-size: cover; background-position: center;">
+  <section class="relative pt-24 pb-20 min-h-[600px] flex items-center" style="background-image: url('${heroImage}'); background-size: cover; background-position: center;">
     <div class="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-blue-800/70"></div>
     <div class="relative max-w-7xl mx-auto px-6 text-white">
       <div class="inline-block bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm mb-6">
@@ -71,7 +89,7 @@ const generateStaticHTML = (data: GeneratedSiteData): string => {
   <section class="py-20 bg-white">
     <div class="max-w-7xl mx-auto px-6">
       <div class="grid md:grid-cols-2 gap-12 items-center">
-        <img src="${repairBenefits.image}" alt="${repairBenefits.title}" class="rounded-xl shadow-lg">
+        <img src="${repairImage}" alt="${repairBenefits.title}" class="rounded-xl shadow-lg">
         <div>
           <h2 class="text-4xl font-bold mb-8 text-gray-900">${repairBenefits.title}</h2>
           ${repairBenefits.items.map(item => `
@@ -101,7 +119,7 @@ const generateStaticHTML = (data: GeneratedSiteData): string => {
             Get an estimate
           </a>
         </div>
-        <img src="${aboutUs.image}" alt="${aboutUs.title}" class="rounded-xl shadow-lg">
+        <img src="${aboutImage}" alt="${aboutUs.title}" class="rounded-xl shadow-lg">
       </div>
     </div>
   </section>
@@ -126,7 +144,7 @@ const generateStaticHTML = (data: GeneratedSiteData): string => {
   <section class="py-20 bg-white">
     <div class="max-w-7xl mx-auto px-6">
       <div class="grid md:grid-cols-2 gap-12 items-center">
-        <img src="${industryValue.valueImage}" alt="${industryValue.title}" class="rounded-xl shadow-lg">
+        <img src="${industryImage}" alt="${industryValue.title}" class="rounded-xl shadow-lg">
         <div>
           <h2 class="text-4xl font-bold mb-6 text-gray-900">${industryValue.title}</h2>
           <p class="text-gray-600 text-lg leading-relaxed">${industryValue.content}</p>
