@@ -68,8 +68,11 @@ const App: React.FC = () => {
           setDeploymentMessage('Building and deploying your site to Vercel...');
           const result = await deploySite(latestSite.data, projectName);
 
-          setDeploymentMessage('Finalizing your site\'s domain and global propagation (10s)...');
-          await new Promise(resolve => setTimeout(resolve, 10000));
+          // 10-second countdown
+          for (let i = 10; i > 0; i--) {
+            setDeploymentMessage(`Deploying... ${i}s`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
 
           setDeploymentStatus('success');
           setDeploymentUrl(result.url);
