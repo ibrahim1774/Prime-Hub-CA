@@ -1,11 +1,13 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { AssetUploader } from '../lib/storage.js';
-import { HtmlRewriter } from '../lib/rewriter.js';
-import { VercelDeployer } from '../lib/deployment.js';
+import { AssetUploader } from '../lib/storage';
+import { HtmlRewriter } from '../lib/rewriter';
+import { VercelDeployer } from '../lib/deployment';
 import * as path from 'path';
 import * as fs from 'fs';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+    console.log(`[API] Deploy request received for project: ${req.body?.projectName}`);
+
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
@@ -20,12 +22,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
     const GCS_BUCKET_NAME = process.env.GCS_BUCKET_NAME;
+    const GCS_CREDENTIALS = process.env.GCS_CREDENTIALS;
 
     if (!VERCEL_TOKEN || !GCS_BUCKET_NAME) {
         return res.status(500).json({ error: 'Server misconfiguration: Missing env vars' });
     }
 
     try {
+        let credentials;
+        if (GCS_CREDENTIALS) {
+            try {
+                credentials = JSON.parse(GCS_CREDENTIALS);
+            } catch (e) {
+                console.error('[API] Failed to parse GCS_CREDENTIALS JSON', e);
+            }
+        }
+
         console.log(`[API] Starting deployment for ${projectName}...`);
 
         // 1. Create a temporary directory for this build
@@ -59,7 +71,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         // 3. Run the pipeline on the temp directory
         // Upload Assets
-        const uploader = new AssetUploader(GCS_BUCKET_NAME);
+        const uploader = new AssetUploader(GCS_BUCKET_NAME, credentials);
         const urlMap = await uploader.uploadDirectoryImages(tempDir, projectName);
         console.log(`[API] Uploaded ${urlMap.size} images.`);
 
