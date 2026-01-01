@@ -68,6 +68,9 @@ const App: React.FC = () => {
           setDeploymentMessage('Building and deploying your site to Vercel...');
           const result = await deploySite(latestSite.data, projectName);
 
+          setDeploymentMessage('Finalizing your site\'s domain and global propagation (10s)...');
+          await new Promise(resolve => setTimeout(resolve, 10000));
+
           setDeploymentStatus('success');
           setDeploymentUrl(result.url);
           setDeploymentMessage('Success! Your site is live.');
@@ -75,7 +78,7 @@ const App: React.FC = () => {
           // Auto-open
           setTimeout(() => {
             window.open(result.url, '_blank');
-          }, 2000);
+          }, 1000);
 
         } catch (error: any) {
           console.error("Auto-deploy failed:", error);
