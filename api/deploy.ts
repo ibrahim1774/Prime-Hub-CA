@@ -21,6 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
+    const VERCEL_TEAM_ID = process.env.VERCEL_TEAM_ID;
     const GCS_BUCKET_NAME = process.env.GCS_BUCKET_NAME;
     const GCS_CREDENTIALS = process.env.GCS_CREDENTIALS;
 
@@ -80,7 +81,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await rewriter.rewriteHtmlFiles(tempDir, urlMap);
 
         // Deploy to Vercel
-        const deployer = new VercelDeployer(VERCEL_TOKEN);
+        const deployer = new VercelDeployer(VERCEL_TOKEN, VERCEL_TEAM_ID);
         const deploymentUrl = await deployer.deploy(tempDir, projectName);
 
         // Cleanup (Optional, Vercel cleans /tmp eventually)

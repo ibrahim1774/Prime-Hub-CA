@@ -59,14 +59,19 @@ export class VercelDeployer {
 
             const deploymentUrl = response.data.url;
             const aliases = response.data.alias || [];
+            const nameFromVercel = response.data.name;
 
             // Prioritize aliases, then try to construct the project domain, then fallback to deployment URL
             let finalUrl = deploymentUrl;
+
             if (aliases.length > 0) {
                 finalUrl = aliases[0];
-            } else if (projectName) {
-                // Most Vercel projects have a default domain: project-name.vercel.app
-                finalUrl = `${projectName}.vercel.app`;
+            } else {
+                // Fallback to project-name.vercel.app
+                const effectiveProjectName = nameFromVercel || projectName;
+                if (effectiveProjectName) {
+                    finalUrl = `${effectiveProjectName}.vercel.app`;
+                }
             }
 
             console.log(`[Deploy] Success! Deployment URL: https://${deploymentUrl}`);
