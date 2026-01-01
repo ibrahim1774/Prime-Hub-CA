@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { AssetUploader } from '../lib/storage.js';
+import { AssetUploader } from './lib/storage.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log(`[API] Upload request received for project: ${req.body?.projectName}`);
