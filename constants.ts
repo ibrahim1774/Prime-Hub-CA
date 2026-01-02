@@ -6,24 +6,22 @@ You are a Senior Conversion-Focused Copywriter for Home Services.
 Your goal is to write high-conversion landing page copy for a home service contractor.
 
 CONTENT STRATEGY RULES (CRITICAL):
-1. Limited Branding: Include the Company Name and Service Area (Location) together in main headlines ONLY 2–3 times total across the entire site. Use these only in the Hero headline and one or two major section headers (e.g., Services or Expertise).
-2. Concise Headlines: Every headline must be extremely concise—aim for 6–8 words maximum.
-3. No Duplication: Do NOT repeat the same wording across different headlines. Avoid duplicating any headline phrasing within body copy or other sections.
-4. Clean Sections: Keep all other sections (FAQs, benefits, cards) clean and generic without repeating the company name and location.
-5. Natural Flow: Ensure the copy doesn't feel like a template.
+1. Brand Placement: Include Company Name + Location in the Hero Headline and ONE other major section title (e.g. Credentials).
+2. Concise Headlines: Aim for 6-8 words maximum.
+3. Industry Customization: Adapt terminology to the specific {industry}.
+4. Premium Tone: Professional, trustworthy, and practical. Avoid hype.
 
-CONSTRAINTS:
-1. Zero Fluff: Avoid "elite," "top," "best," "premium," "#1," or "luxury."
-2. Neutral/Practical Language: Use words like "Trusted," "Local," "Reliable," "Practical," and "Honest."
-3. NO Promotional Claims: Forbidden to include pricing, discounts, percentages, or financing language.
-4. CTA Rule: The primary call-to-action MUST be "Get an estimate".
-5. Icon Selection: Use Lucide-react icon names in dash-case (e.g., "wrench", "shield-check", "clock").
-6. Sections: 
-   - 'About Us': Concise summary of local presence.
-   - 'Why This Industry Matters': Universal importance of the service.
-   - 'Additional Benefits': EXACTLY 3 unique benefit cards.
-   - 'FAQs': EXACTLY 4 distinct common-sense questions.
-   - 'Repair Benefits': Section focused on professional repairs.
+SECTIONS TO GENERATE:
+1. Hero: Headline (3 lines), subtext, badge, and 3-4 key stats (e.g. "Years in Business", "Completed Projects").
+2. Services: Exactly 4 distinct service cards with icons.
+3. Value Proposition: Section headline, subtitle, descriptive content, and 3-4 highlights (bullet points).
+4. Trust Indicators: Exactly 4 blocks highlighting guarantees, licensing, or availability.
+5. Benefits/Advantages: Section headline and exactly 6 checklist items.
+6. Process: Exactly 3 logical steps from start to finish.
+7. Credentials: Title, description, and list of 3-4 certification names/badges.
+8. FAQs: Exactly 4 common questions.
+
+Icon Selection: Use Lucide-react icon names in dash-case (e.g., "wrench", "shield-check", "clock").
 
 Industry: {industry}
 Company: {companyName}
@@ -48,9 +46,22 @@ export const RESPONSE_SCHEMA = {
           },
           required: ["line1", "line2", "line3"]
         },
-        subtext: { type: Type.STRING }
+        subtext: { type: Type.STRING },
+        stats: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              label: { type: Type.STRING },
+              value: { type: Type.STRING }
+            },
+            required: ["label", "value"]
+          },
+          minItems: 3,
+          maxItems: 4
+        }
       },
-      required: ["badge", "headline", "subtext"]
+      required: ["badge", "headline", "subtext", "stats"]
     },
     services: {
       type: Type.OBJECT,
@@ -72,7 +83,22 @@ export const RESPONSE_SCHEMA = {
       },
       required: ["cards"]
     },
-    repairBenefits: {
+    valueProposition: {
+      type: Type.OBJECT,
+      properties: {
+        title: { type: Type.STRING },
+        subtitle: { type: Type.STRING },
+        content: { type: Type.STRING },
+        highlights: {
+          type: Type.ARRAY,
+          items: { type: Type.STRING },
+          minItems: 3,
+          maxItems: 4
+        }
+      },
+      required: ["title", "subtitle", "content", "highlights"]
+    },
+    trustIndicators: {
       type: Type.OBJECT,
       properties: {
         title: { type: Type.STRING },
@@ -87,32 +113,30 @@ export const RESPONSE_SCHEMA = {
             },
             required: ["title", "description", "icon"]
           },
-          minItems: 3,
-          maxItems: 3
+          minItems: 4,
+          maxItems: 4
         }
       },
       required: ["title", "items"]
     },
-    aboutUs: {
+    benefits: {
       type: Type.OBJECT,
       properties: {
         title: { type: Type.STRING },
-        content: { type: Type.STRING }
+        items: {
+          type: Type.ARRAY,
+          items: { type: Type.STRING },
+          minItems: 6,
+          maxItems: 6
+        }
       },
-      required: ["title", "content"]
+      required: ["title", "items"]
     },
-    whyItMatters: {
+    process: {
       type: Type.OBJECT,
       properties: {
         title: { type: Type.STRING },
-        content: { type: Type.STRING }
-      },
-      required: ["title", "content"]
-    },
-    additionalBenefits: {
-      type: Type.OBJECT,
-      properties: {
-        cards: {
+        steps: {
           type: Type.ARRAY,
           items: {
             type: Type.OBJECT,
@@ -127,27 +151,21 @@ export const RESPONSE_SCHEMA = {
           maxItems: 3
         }
       },
-      required: ["cards"]
+      required: ["title", "steps"]
     },
-    industryValue: {
+    credentials: {
       type: Type.OBJECT,
       properties: {
         title: { type: Type.STRING },
-        content: { type: Type.STRING }
-      },
-      required: ["title", "content"]
-    },
-    benefits: {
-      type: Type.OBJECT,
-      properties: {
-        items: {
+        description: { type: Type.STRING },
+        badges: {
           type: Type.ARRAY,
           items: { type: Type.STRING },
-          minItems: 5,
-          maxItems: 6
+          minItems: 3,
+          maxItems: 4
         }
       },
-      required: ["items"]
+      required: ["title", "description", "badges"]
     },
     faqs: {
       type: Type.ARRAY,
@@ -172,7 +190,7 @@ export const RESPONSE_SCHEMA = {
       required: ["phone", "location", "companyName"]
     }
   },
-  required: ["bannerText", "hero", "services", "repairBenefits", "aboutUs", "whyItMatters", "additionalBenefits", "industryValue", "benefits", "faqs", "contact"]
+  required: ["bannerText", "hero", "services", "valueProposition", "trustIndicators", "benefits", "process", "credentials", "faqs", "contact"]
 };
 
 export const STATUS_MESSAGES = [

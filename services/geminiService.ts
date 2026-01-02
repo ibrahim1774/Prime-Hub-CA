@@ -16,7 +16,7 @@ const cleanJsonResponse = (text: string): string => {
 export const generateSiteContent = async (inputs: GeneratorInputs): Promise<GeneratedSiteData> => {
   // Always create a new instance right before usage to get the latest environment state
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  
+
   const textPrompt = SYSTEM_PROMPT
     .replace("{industry}", inputs.industry)
     .replace("{companyName}", inputs.companyName)
@@ -38,14 +38,13 @@ export const generateSiteContent = async (inputs: GeneratorInputs): Promise<Gene
     const cleanedText = cleanJsonResponse(rawText);
     const siteData: Partial<GeneratedSiteData> = JSON.parse(cleanedText);
 
-    // 2. Prepare Image Prompts
-    const imagePromptHero = `Candid high-end professional photography of ${inputs.industry} technicians working at a job site in ${inputs.location}. Cinematic lighting, natural environment, 8k resolution. No text.`;
-    const imagePromptValue = `Authentic photo showing the high quality results of professional ${inputs.industry} work in a residential setting in ${inputs.location}. Natural lighting. No text.`;
-    const imagePromptAbout = `A professional ${inputs.industry} contractor or a clean service vehicle in a ${inputs.location} residential area. Friendly and local vibe. No text.`;
-    const imagePromptRepair = `A realistic photo of a professional technician performing detailed ${inputs.industry} repairs. Authentic work environment, high quality focus. No text.`;
+    // 2. Prepare Image Prompts (3-Image Strategy)
+    const imagePromptHero = `Wide establishing shot of a professional ${inputs.industry} team at a job site in ${inputs.location}. Professional uniforms, cinematic lighting, 8k resolution. No text.`;
+    const imagePromptValue = `Action shot of a ${inputs.industry} professional performing service. Close-up on tools and expert workmanship, natural lighting, high quality. No text.`;
+    const imagePromptTeam = `Professional team portrait of 4-6 ${inputs.industry} contractors in uniform standing confidently in front of a service vehicle in ${inputs.location}. Trustworthy and established business vibe. No text.`;
 
     // 3. Generate Images in Parallel
-    const [heroImgRes, valueImgRes, aboutImgRes, repairImgRes] = await Promise.all([
+    const [heroImgRes, valueImgRes, teamImgRes] = await Promise.all([
       ai.models.generateContent({
         model: 'gemini-2.5-flash-image',
         contents: { parts: [{ text: imagePromptHero }] },
@@ -56,11 +55,7 @@ export const generateSiteContent = async (inputs: GeneratorInputs): Promise<Gene
       }),
       ai.models.generateContent({
         model: 'gemini-2.5-flash-image',
-        contents: { parts: [{ text: imagePromptAbout }] },
-      }),
-      ai.models.generateContent({
-        model: 'gemini-2.5-flash-image',
-        contents: { parts: [{ text: imagePromptRepair }] },
+        contents: { parts: [{ text: imagePromptTeam }] },
       })
     ]);
 
@@ -80,16 +75,12 @@ export const generateSiteContent = async (inputs: GeneratorInputs): Promise<Gene
     // 4. Combine and Sanitize
     if (!siteData.hero) siteData.hero = {} as any;
     if (!siteData.contact) siteData.contact = {} as any;
-    if (!siteData.aboutUs) siteData.aboutUs = {} as any;
-    if (!siteData.repairBenefits) siteData.repairBenefits = {} as any;
+    if (!siteData.valueProposition) siteData.valueProposition = {} as any;
+    if (!siteData.credentials) siteData.credentials = {} as any;
 
     siteData.hero.heroImage = extractImage(heroImgRes);
-    siteData.aboutUs.image = extractImage(aboutImgRes);
-    siteData.repairBenefits.image = extractImage(repairImgRes);
-    
-    if (siteData.industryValue) {
-      siteData.industryValue.valueImage = extractImage(valueImgRes);
-    }
+    siteData.valueProposition.image = extractImage(valueImgRes);
+    siteData.credentials.teamImage = extractImage(teamImgRes);
 
     siteData.contact.phone = inputs.phone;
     siteData.contact.location = inputs.location;

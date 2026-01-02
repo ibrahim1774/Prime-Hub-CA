@@ -27,38 +27,46 @@ export interface GeneratedSiteData {
     };
     subtext: string;
     heroImage: string;
+    stats?: {
+      label: string;
+      value: string;
+    }[];
   };
   services: {
     cards: ServiceCard[];
   };
-  repairBenefits: {
+  valueProposition: {
     title: string;
+    subtitle: string;
+    content: string;
     image: string;
+    highlights: string[];
+  };
+  trustIndicators: {
+    title: string;
     items: {
       title: string;
       description: string;
       icon: string;
     }[];
   };
-  aboutUs: {
-    title: string;
-    content: string;
-    image: string;
-  };
-  whyItMatters: {
-    title: string;
-    content: string;
-  };
-  additionalBenefits: {
-    cards: BenefitCard[];
-  };
-  industryValue: {
-    title: string;
-    content: string;
-    valueImage: string;
-  };
   benefits: {
+    title: string;
     items: string[];
+  };
+  process: {
+    title: string;
+    steps: {
+      title: string;
+      description: string;
+      icon: string;
+    }[];
+  };
+  credentials: {
+    title: string;
+    description: string;
+    badges: string[];
+    teamImage: string;
   };
   faqs: FAQItem[];
   contact: {
