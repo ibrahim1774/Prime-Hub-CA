@@ -17,34 +17,27 @@ export const generateSiteContent = async (inputs: GeneratorInputs): Promise<Gene
   // Always create a new instance right before usage to get the latest environment state
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-  const textPrompt = SYSTEM_PROMPT
-    .replace("{industry}", inputs.industry)
-    .replace("{companyName}", inputs.companyName)
-    .replace("{location}", inputs.location)
-    .replace("{phone}", inputs.phone);
-
   try {
-    // 1. Generate Text Content
-    const textResponse = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: textPrompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: RESPONSE_SCHEMA as any,
-      },
-    });
+    // 1. Prepare Prompts
+    const textPrompt = SYSTEM_PROMPT
+      .replace("{industry}", inputs.industry)
+      .replace("{companyName}", inputs.companyName)
+      .replace("{location}", inputs.location)
+      .replace("{phone}", inputs.phone);
 
-    const rawText = textResponse.text || "{}";
-    const cleanedText = cleanJsonResponse(rawText);
-    const siteData: Partial<GeneratedSiteData> = JSON.parse(cleanedText);
-
-    // 2. Prepare Image Prompts (3-Image Strategy)
     const imagePromptHero = `Wide establishing shot of a professional ${inputs.industry} team at a job site in ${inputs.location}. Professional uniforms, cinematic lighting, 8k resolution. No text.`;
     const imagePromptValue = `Action shot of a ${inputs.industry} professional performing service. Close-up on tools and expert workmanship, natural lighting, high quality. No text.`;
-    const imagePromptTeam = `Professional team portrait of 4-6 ${inputs.industry} contractors in uniform standing confidently in front of a service vehicle in ${inputs.location}. Trustworthy and established business vibe. No text.`;
 
-    // 3. Generate Images in Parallel
-    const [heroImgRes, valueImgRes, teamImgRes] = await Promise.all([
+    // 2. Generate Text and Images in Parallel
+    const [textResponse, heroImgRes, valueImgRes] = await Promise.all([
+      ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: textPrompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: RESPONSE_SCHEMA as any,
+        },
+      }),
       ai.models.generateContent({
         model: 'gemini-2.5-flash-image',
         contents: { parts: [{ text: imagePromptHero }] },
@@ -52,12 +45,13 @@ export const generateSiteContent = async (inputs: GeneratorInputs): Promise<Gene
       ai.models.generateContent({
         model: 'gemini-2.5-flash-image',
         contents: { parts: [{ text: imagePromptValue }] },
-      }),
-      ai.models.generateContent({
-        model: 'gemini-2.5-flash-image',
-        contents: { parts: [{ text: imagePromptTeam }] },
       })
     ]);
+
+    // 3. Process Text Results
+    const rawText = textResponse.text || "{}";
+    const cleanedText = cleanJsonResponse(rawText);
+    const siteData: Partial<GeneratedSiteData> = JSON.parse(cleanedText);
 
     const extractImage = (response: any) => {
       try {
@@ -76,11 +70,9 @@ export const generateSiteContent = async (inputs: GeneratorInputs): Promise<Gene
     if (!siteData.hero) siteData.hero = {} as any;
     if (!siteData.contact) siteData.contact = {} as any;
     if (!siteData.valueProposition) siteData.valueProposition = {} as any;
-    if (!siteData.credentials) siteData.credentials = {} as any;
 
     siteData.hero.heroImage = extractImage(heroImgRes);
     siteData.valueProposition.image = extractImage(valueImgRes);
-    siteData.credentials.teamImage = extractImage(teamImgRes);
 
     siteData.contact.phone = inputs.phone;
     siteData.contact.location = inputs.location;
