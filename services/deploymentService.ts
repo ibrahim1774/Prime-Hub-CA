@@ -107,6 +107,10 @@ export const deploySite = async (data: GeneratedSiteData, projectName: string) =
       deployData.valueProposition.image = await uploadAsset(deployData.valueProposition.image);
     }
 
+    if (deployData.whoWeHelp?.image?.startsWith('data:')) {
+      deployData.whoWeHelp.image = await uploadAsset(deployData.whoWeHelp.image);
+    }
+
     // 3. Render with paths (now URLs)
     const cleanBodyHtml = renderToStaticMarkup(React.createElement(SiteRenderer, { data: deployData, isEditMode: false }));
     files['index.html'] = `<!DOCTYPE html>

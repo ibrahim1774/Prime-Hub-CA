@@ -56,6 +56,11 @@ export interface GeneratedSiteData {
       icon: string;
     }[];
   };
+  whoWeHelp: {
+    title: string;
+    image: string;
+    bullets: string[];
+  };
   faqs: FAQItem[];
   footer: {
     headline: string;

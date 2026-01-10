@@ -7,7 +7,7 @@ import { CheckCircle, Camera, Sparkles, UserCheck, HelpCircle, ArrowRight, Shiel
 interface SiteRendererProps {
   data: GeneratedSiteData;
   isEditMode: boolean;
-  onUpdate: (updatedData: GeneratedSiteData) => void;
+  onUpdate?: (updatedData: GeneratedSiteData) => void;
 }
 
 const formatPhoneNumber = (phone: string) => {
@@ -83,6 +83,7 @@ const SiteRenderer: React.FC<SiteRendererProps> = ({ data, isEditMode, onUpdate 
   const primaryColor = '#2563eb'; // Default premium blue
 
   const updateField = (path: string, val: any) => {
+    if (!onUpdate) return;
     const newData = JSON.parse(JSON.stringify(data));
     const keys = path.split('.');
     let current = newData;
@@ -427,6 +428,50 @@ const SiteRenderer: React.FC<SiteRendererProps> = ({ data, isEditMode, onUpdate 
         </div>
       </section>
 
+
+      {/* Who We Help Section */}
+      <section className="py-12 md:py-16 bg-white overflow-hidden" id="who-we-help">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
+            <div className="w-full md:w-1/2 order-2 md:order-1">
+              <EditableImage
+                src={data.whoWeHelp.image}
+                isEditMode={isEditMode}
+                onUpload={(val: string) => updateField('whoWeHelp.image', val)}
+                className="rounded-3xl shadow-2xl w-full h-[300px] md:h-[500px] object-cover"
+                alt={data.whoWeHelp.title}
+              />
+            </div>
+
+            <div className="w-full md:w-1/2 order-1 md:order-2">
+              <EditableText
+                text={data.whoWeHelp.title}
+                isEditMode={isEditMode}
+                onBlur={(val) => updateField('whoWeHelp.title', val)}
+                className="text-3xl md:text-5xl font-black tracking-tighter mb-6 md:mb-8 text-gray-900 leading-tight"
+              />
+
+              <div className="space-y-4 md:space-y-6">
+                {data.whoWeHelp.bullets.map((bullet, idx) => (
+                  <div key={idx} className="flex items-start gap-3 md:gap-4 group">
+                    <div className="mt-1.5 w-2 h-2 rounded-full bg-blue-600 shrink-0" style={{ backgroundColor: primaryColor }} />
+                    <EditableText
+                      text={bullet}
+                      isEditMode={isEditMode}
+                      onBlur={(val) => {
+                        const newBullets = [...data.whoWeHelp.bullets];
+                        newBullets[idx] = val;
+                        updateField('whoWeHelp.bullets', newBullets);
+                      }}
+                      className="text-lg md:text-xl text-gray-600 font-medium leading-relaxed group-hover:text-gray-900 transition-colors"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* FAQ Section */}
       <section className="py-12 md:py-20 px-6 md:px-12 bg-slate-50">

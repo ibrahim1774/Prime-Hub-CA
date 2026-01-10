@@ -38,8 +38,9 @@ SECTIONS TO GENERATE:
 3. Value Proposition: Section headline (personalize with {location}), subtitle, descriptive content, highlights, and ctaText (MUST include {phone}).
 4. Process: Exactly 3 logical steps from start to finish.
 5. Key Highlights: Headline (personalize with {location}) and exactly 6 checklist items.
-6. FAQs: Exactly 4 common questions.
-7. Conclusion/Footer: A final persuasive heading and ctaText (MUST include {phone}).
+6. Who We Help: A heading (e.g., "Who This Is For") and exactly 3-5 concise bullet points based on the target audience.
+7. FAQs: Exactly 4 common questions.
+8. Conclusion/Footer: A final persuasive heading and ctaText (MUST include {phone}).
 
 Icon Selection: Use Lucide-react icon names in dash-case (e.g., "wrench", "shield-check", "clock").
 
@@ -153,6 +154,20 @@ export const RESPONSE_SCHEMA = {
         }
       },
       required: ["title", "items"]
+    },
+    whoWeHelp: {
+      type: Type.OBJECT,
+      properties: {
+        title: { type: Type.STRING },
+        imagePrompt: { type: Type.STRING },
+        bullets: {
+          type: Type.ARRAY,
+          items: { type: Type.STRING },
+          minItems: 3,
+          maxItems: 5
+        }
+      },
+      required: ["title", "imagePrompt", "bullets"]
     },
     faqs: {
       type: Type.ARRAY,

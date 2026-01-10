@@ -28,8 +28,10 @@ export const generateSiteContent = async (inputs: GeneratorInputs): Promise<Gene
     const imagePromptHero = `Wide establishing shot of a professional ${inputs.industry} team at a job site in ${inputs.location}. Professional uniforms, cinematic lighting, 8k resolution. No text.`;
     const imagePromptValue = `Action shot of a ${inputs.industry} professional performing service. Close-up on tools and expert workmanship, natural lighting, high quality. No text.`;
 
+    const imagePromptWho = `Professional photo of a ${inputs.industry} customer at home, looking happy and satisfied with services provided by ${inputs.companyName} in ${inputs.location}. High quality, natural lighting. No text.`;
+
     // 2. Generate Text and Images in Parallel
-    const [textResponse, heroImgRes, valueImgRes] = await Promise.all([
+    const [textResponse, heroImgRes, valueImgRes, whoImgRes] = await Promise.all([
       ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: textPrompt,
@@ -45,6 +47,10 @@ export const generateSiteContent = async (inputs: GeneratorInputs): Promise<Gene
       ai.models.generateContent({
         model: 'gemini-2.5-flash-image',
         contents: { parts: [{ text: imagePromptValue }] },
+      }),
+      ai.models.generateContent({
+        model: 'gemini-2.5-flash-image',
+        contents: { parts: [{ text: imagePromptWho }] },
       })
     ]);
 
@@ -70,13 +76,20 @@ export const generateSiteContent = async (inputs: GeneratorInputs): Promise<Gene
     if (!siteData.hero) siteData.hero = {} as any;
     if (!siteData.contact) siteData.contact = {} as any;
     if (!siteData.valueProposition) siteData.valueProposition = {} as any;
+    if (!siteData.whoWeHelp) siteData.whoWeHelp = {} as any;
 
-    siteData.hero.heroImage = extractImage(heroImgRes);
-    siteData.valueProposition.image = extractImage(valueImgRes);
+    const hero = siteData.hero!;
+    const vp = siteData.valueProposition!;
+    const wwh = siteData.whoWeHelp!;
+    const contact = siteData.contact!;
 
-    siteData.contact.phone = inputs.phone;
-    siteData.contact.location = inputs.location;
-    siteData.contact.companyName = inputs.companyName;
+    hero.heroImage = extractImage(heroImgRes);
+    vp.image = extractImage(valueImgRes);
+    wwh.image = extractImage(whoImgRes);
+
+    contact.phone = inputs.phone;
+    contact.location = inputs.location;
+    contact.companyName = inputs.companyName;
 
     return siteData as GeneratedSiteData;
   } catch (error: any) {
