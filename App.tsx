@@ -42,13 +42,27 @@ const App: React.FC = () => {
         // 1. Clear the URL param so it doesn't re-trigger on refresh
         window.history.replaceState({}, '', window.location.pathname);
 
-        // Fire Facebook Pixel Purchase Event
+        // Generate a unique event ID for deduplication between Pixel and CAPI
+        const eventId = crypto.randomUUID();
+
+        // Fire Facebook Pixel Purchase Event (client-side) with eventID for dedup
         if (window.fbq) {
           window.fbq('track', 'Purchase', {
             value: parseFloat(import.meta.env.VITE_PURCHASE_VALUE || '10.00'),
             currency: import.meta.env.VITE_PURCHASE_CURRENCY || 'USD'
-          });
+          }, { eventID: eventId });
         }
+
+        // Fire server-side Facebook CAPI Purchase Event (fire and forget)
+        fetch('api/fb-purchase-event', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event_id: eventId,
+            event_source_url: window.location.origin,
+            user_agent: navigator.userAgent,
+          }),
+        }).catch(err => console.error('[FB CAPI] Client-side call failed:', err));
 
         setDeploymentStatus('deploying');
         setDeploymentMessage('Payment Verified! Starting automated deployment...');
