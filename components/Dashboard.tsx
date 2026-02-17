@@ -223,10 +223,10 @@ const Dashboard: React.FC<DashboardProps> = ({ site, onEditSite, onSignOut, onSi
             <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-3">Support</div>
             <div className="text-sm text-gray-300 mb-2">Questions / Support / Cancellations</div>
             <a
-              href="mailto:support@primehub.ai"
+              href="mailto:ibrahim3709@gmail.com"
               className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
             >
-              <Mail size={14} /> support@primehub.ai
+              <Mail size={14} /> ibrahim3709@gmail.com
             </a>
           </div>
 

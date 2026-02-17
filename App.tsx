@@ -21,10 +21,18 @@ declare global {
   }
 }
 
-const BannerText: React.FC<{ text: string }> = ({ text }) => {
+const MarqueeText: React.FC<{ text: string }> = ({ text }) => {
   return (
-    <div className="text-center flex-1 px-4 font-bold text-[15px] md:text-base tracking-tight leading-snug md:leading-tight py-1">
-      {text}
+    <div className="flex-1 overflow-hidden whitespace-nowrap min-w-0">
+      <div className="inline-block animate-[marquee_12s_linear_infinite] font-bold text-sm tracking-tight">
+        {text}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{text}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </div>
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
     </div>
   );
 };
@@ -513,8 +521,8 @@ const App: React.FC = () => {
             </div>
           ) : (
             /* Pre-payment red banner */
-            <div className="sticky top-0 z-[110] bg-red-600 text-white px-4 py-3 md:py-5 shadow-lg flex items-center justify-between min-h-[60px]">
-              <div className="flex items-center gap-1 md:gap-2 flex-1 min-w-0">
+            <div className="sticky top-0 z-[110] bg-red-600 text-white px-4 py-2 md:py-3 shadow-lg flex items-center justify-between min-h-[48px]">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
                 <button
                   onClick={handleBackFromEditor}
                   className="p-1 hover:bg-white/10 rounded transition-colors shrink-0"
@@ -522,9 +530,7 @@ const App: React.FC = () => {
                 >
                   <ChevronLeft size={20} />
                 </button>
-                <BannerText
-                  text="Tap text to edit or tap images to replace them, after done click deploy website below"
-                />
+                <MarqueeText text="Tap to edit text & images, then deploy below." />
               </div>
 
               <div className="flex items-center gap-2 shrink-0 ml-2">
@@ -545,7 +551,7 @@ const App: React.FC = () => {
             </div>
           )}
 
-          <main className={`bg-white ${isPostPayment ? '' : 'pb-24'}`}>
+          <main className={`bg-white ${isPostPayment ? '' : 'pb-[340px] md:pb-52'}`}>
             <SiteRenderer
               data={activeSite.data}
               isEditMode={true}
@@ -555,21 +561,32 @@ const App: React.FC = () => {
 
           {/* Pre-payment bottom bar */}
           {!isPostPayment && (
-            <div className="fixed bottom-0 left-0 right-0 z-[100] bg-white border-t border-gray-100 p-3 md:p-4 shadow-[0_-8px_20px_rgba(0,0,0,0.05)]">
-              <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-center gap-3">
-                <div className="text-center md:text-left">
-                  <p className="text-gray-900 font-bold text-xs md:text-sm">
+            <div className="fixed bottom-0 left-0 right-0 z-[100] bg-white border-t border-gray-100 p-4 md:p-5 shadow-[0_-8px_20px_rgba(0,0,0,0.05)]">
+              <div className="max-w-3xl mx-auto space-y-4">
+                {/* HOW IT WORKS + steps */}
+                <div className="text-center">
+                  <p className="text-black font-bold text-sm uppercase tracking-[0.2em] mb-2">How It Works</p>
+                  <div className="flex flex-col md:flex-row md:justify-center md:gap-6 gap-1">
+                    <span className="text-black font-bold text-sm">1. Edit your text & images above</span>
+                    <span className="text-black font-bold text-sm">2. Click deploy when ready</span>
+                    <span className="text-black font-bold text-sm">3. Your site goes live instantly</span>
+                  </div>
+                </div>
+
+                {/* Pricing + deploy button */}
+                <div className="flex flex-col md:flex-row items-center justify-center gap-3">
+                  <p className="text-black font-bold text-sm uppercase tracking-tight text-center">
                     PAY ONLY $10/MONTH WEBSITE HOSTING TO HAVE YOUR CUSTOM SITE LIVE & ACTIVE
                   </p>
+                  <button
+                    onClick={handleDeploy}
+                    disabled={deploymentStatus === 'deploying'}
+                    className="w-full md:w-auto bg-blue-600 text-white px-8 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 hover:bg-blue-700 active:scale-[0.95] transition-all uppercase tracking-wider disabled:opacity-50"
+                  >
+                    {deploymentStatus === 'deploying' ? <Loader2 className="animate-spin" size={18} /> : <Rocket size={18} />}
+                    Deploy Website
+                  </button>
                 </div>
-                <button
-                  onClick={handleDeploy}
-                  disabled={deploymentStatus === 'deploying'}
-                  className="w-full md:w-auto bg-blue-600 text-white px-8 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 hover:bg-blue-700 active:scale-95 transition-all uppercase tracking-tighter disabled:opacity-50"
-                >
-                  {deploymentStatus === 'deploying' ? <Loader2 className="animate-spin" size={18} /> : <Rocket size={18} />}
-                  Deploy Website
-                </button>
               </div>
             </div>
           )}
