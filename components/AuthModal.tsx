@@ -7,9 +7,10 @@ interface AuthModalProps {
   onClose: () => void;
   initialMode: 'signin' | 'signup';
   onAuthSuccess: (mode: 'signin' | 'signup') => void;
+  signInOnly?: boolean;
 }
 
-const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode, onAuthSuccess }) => {
+const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode, onAuthSuccess, signInOnly }) => {
   const { signIn, signUp } = useAuth();
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
   const [fullName, setFullName] = useState('');
@@ -77,29 +78,33 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode, onA
           <X size={20} />
         </button>
 
-        {/* Tabs */}
-        <div className="flex gap-1 mb-8 bg-white/5 rounded-xl p-1">
-          <button
-            onClick={() => { setMode('signin'); setError(''); }}
-            className={`flex-1 py-2.5 rounded-lg text-sm font-bold uppercase tracking-wider transition-all ${
-              mode === 'signin'
-                ? 'bg-blue-600 text-white shadow-lg'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Sign In
-          </button>
-          <button
-            onClick={() => { setMode('signup'); setError(''); }}
-            className={`flex-1 py-2.5 rounded-lg text-sm font-bold uppercase tracking-wider transition-all ${
-              mode === 'signup'
-                ? 'bg-blue-600 text-white shadow-lg'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Sign Up
-          </button>
-        </div>
+        {/* Tabs or heading */}
+        {signInOnly ? (
+          <h2 className="text-xl font-bold text-white mb-8 text-center uppercase tracking-wider">Sign In</h2>
+        ) : (
+          <div className="flex gap-1 mb-8 bg-white/5 rounded-xl p-1">
+            <button
+              onClick={() => { setMode('signin'); setError(''); }}
+              className={`flex-1 py-2.5 rounded-lg text-sm font-bold uppercase tracking-wider transition-all ${
+                mode === 'signin'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => { setMode('signup'); setError(''); }}
+              className={`flex-1 py-2.5 rounded-lg text-sm font-bold uppercase tracking-wider transition-all ${
+                mode === 'signup'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Sign Up
+            </button>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Full Name (sign up only) */}
@@ -159,22 +164,24 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode, onA
           </button>
         </form>
 
-        {/* Toggle link */}
-        <p className="text-center text-gray-500 text-sm mt-6">
-          {mode === 'signin' ? (
-            <>Don't have an account?{' '}
-              <button onClick={switchMode} className="text-blue-400 hover:text-blue-300 font-bold">
-                Sign Up
-              </button>
-            </>
-          ) : (
-            <>Already have an account?{' '}
-              <button onClick={switchMode} className="text-blue-400 hover:text-blue-300 font-bold">
-                Sign In
-              </button>
-            </>
-          )}
-        </p>
+        {/* Toggle link (hidden in signInOnly mode) */}
+        {!signInOnly && (
+          <p className="text-center text-gray-500 text-sm mt-6">
+            {mode === 'signin' ? (
+              <>Don't have an account?{' '}
+                <button onClick={switchMode} className="text-blue-400 hover:text-blue-300 font-bold">
+                  Sign Up
+                </button>
+              </>
+            ) : (
+              <>Already have an account?{' '}
+                <button onClick={switchMode} className="text-blue-400 hover:text-blue-300 font-bold">
+                  Sign In
+                </button>
+              </>
+            )}
+          </p>
+        )}
       </div>
     </div>
   );

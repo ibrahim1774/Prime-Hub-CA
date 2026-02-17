@@ -673,6 +673,7 @@ const App: React.FC = () => {
         onClose={() => setShowAuthModal(false)}
         initialMode={authModalMode}
         onAuthSuccess={handleAuthSuccess}
+        signInOnly={authModalMode === 'signin'}
       />
     </div>
   );
