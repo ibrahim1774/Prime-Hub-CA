@@ -2,8 +2,23 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const anonKey = process.env.VITE_SUPABASE_ANON_KEY!;
+
+function createSupabaseClient(userToken?: string) {
+  // Prefer service role key (bypasses RLS entirely)
+  if (serviceRoleKey) {
+    return createClient(supabaseUrl, serviceRoleKey);
+  }
+  // Fall back to anon key with user's auth token (RLS-compliant)
+  if (userToken) {
+    return createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: `Bearer ${userToken}` } },
+    });
+  }
+  // Last resort: anon key without auth (for anonymous deploys)
+  return createClient(supabaseUrl, anonKey);
+}
 
 function generateSubdomain(companyName: string): string {
   return companyName
@@ -15,7 +30,7 @@ function generateSubdomain(companyName: string): string {
     .substring(0, 50);
 }
 
-async function getUniqueSubdomain(companyName: string, siteId: string): Promise<string> {
+async function getUniqueSubdomain(companyName: string, siteId: string, supabase: any): Promise<string> {
   // First check if this site already has a subdomain
   const { data: existing } = await supabase
     .from('sites')
@@ -52,16 +67,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { siteId, siteData, formInputs, userId } = req.body;
+  const { siteId, siteData, formInputs, userId, token } = req.body;
 
   if (!siteId || !siteData) {
     return res.status(400).json({ error: 'Missing siteId or siteData' });
   }
 
+  const supabase = createSupabaseClient(token);
+
   try {
     // 1. Generate unique subdomain
     const companyName = siteData.contact?.companyName || 'site';
-    const subdomain = await getUniqueSubdomain(companyName, siteId);
+    const subdomain = await getUniqueSubdomain(companyName, siteId, supabase);
     const deployedUrl = `https://${subdomain}.ablarme.com`;
 
     // 2. Upsert to Supabase

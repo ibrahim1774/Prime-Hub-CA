@@ -1,4 +1,5 @@
 import { GeneratedSiteData, SiteInstance } from '../types.js';
+import { supabase } from './supabaseService.js';
 
 /**
  * Upload any remaining base64 images in site data to GCS.
@@ -69,6 +70,10 @@ export const deploySite = async (
 
   const cleanData = await uploadSiteImages(site.data, projectName);
 
+  // Get user's auth token for server-side RLS authentication
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+
   // 2. Call server-side deploy API (handles subdomain, Supabase upsert, cache purge)
   const response = await fetch('/api/deploy-site', {
     method: 'POST',
@@ -78,6 +83,7 @@ export const deploySite = async (
       siteData: cleanData,
       formInputs: site.formInputs,
       userId,
+      token,
     }),
   });
 
