@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext.js';
 import { User, Mail, Lock, Loader2, X } from 'lucide-react';
 
@@ -18,6 +18,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode, onA
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Sync internal mode with initialMode whenever the modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode);
+      setError('');
+    }
+  }, [isOpen, initialMode]);
 
   if (!isOpen) return null;
 

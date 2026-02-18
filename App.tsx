@@ -88,6 +88,13 @@ const App: React.FC = () => {
     }
   }, [authLoading, isAuthenticated, user]);
 
+  // ─── Safety net: redirect away from dashboard if not authenticated ───
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated && currentView === 'dashboard') {
+      setCurrentView('generator');
+    }
+  }, [authLoading, isAuthenticated, currentView]);
+
   // ─── Handle Payment Success & Auto-Deploy ───
   useEffect(() => {
     const checkPaymentAndDeploy = async () => {
@@ -203,25 +210,33 @@ const App: React.FC = () => {
     setShowAuthModal(false);
     setShowSuccessModal(false);
 
-    // Small delay to let auth state propagate
-    await new Promise(r => setTimeout(r, 500));
-
-    if (mode === 'signup' && activeSite) {
-      // Migrate current site from IndexedDB to Supabase
-      const { data: { user: newUser } } = await (await import('./services/supabaseService.js')).supabase.auth.getUser();
-      if (newUser) {
-        await migrateSiteToUser(activeSite, newUser.id);
-      }
-    } else if (mode === 'signin') {
-      // Load user's site from Supabase
-      const { data: { user: existingUser } } = await (await import('./services/supabaseService.js')).supabase.auth.getUser();
-      if (existingUser) {
-        const site = await loadUserSite(existingUser.id);
-        if (site) setActiveSite(site);
+    // Wait for auth state to actually propagate (poll up to 3 seconds)
+    const { supabase: sb } = await import('./services/supabaseService.js');
+    let authenticated = false;
+    for (let i = 0; i < 6; i++) {
+      await new Promise(r => setTimeout(r, 500));
+      const { data: { session } } = await sb.auth.getSession();
+      if (session?.user) {
+        authenticated = true;
+        break;
       }
     }
 
-    setCurrentView('dashboard');
+    if (authenticated) {
+      const { data: { user: authUser } } = await sb.auth.getUser();
+      if (authUser) {
+        if (mode === 'signup' && activeSite) {
+          await migrateSiteToUser(activeSite, authUser.id);
+        } else if (mode === 'signin') {
+          const site = await loadUserSite(authUser.id);
+          if (site) setActiveSite(site);
+        }
+      }
+      setCurrentView('dashboard');
+    } else {
+      // Auth didn't propagate (e.g. email confirmation required) — stay on current view
+      setCurrentView('generator');
+    }
   }, [activeSite]);
 
   const handleSignOut = useCallback(async () => {
