@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext.js';
 import { SiteInstance } from '../types.js';
+import DomainManager from './DomainManager.js';
 import {
   Zap, ChevronDown, LogOut, LayoutDashboard, Pencil,
   CircleDot, Mail, Clock, Globe, ExternalLink
@@ -191,6 +192,11 @@ const Dashboard: React.FC<DashboardProps> = ({ site, onEditSite, onSignOut, onSi
             <h3 className="text-lg font-bold text-gray-400 mb-2">No website yet</h3>
             <p className="text-gray-500 text-sm">Generate your first website to get started.</p>
           </div>
+        )}
+
+        {/* ─── Custom Domain ─── */}
+        {site && site.deploymentStatus === 'deployed' && (
+          <DomainManager site={site} onSiteUpdated={onSiteUpdated} />
         )}
 
         {/* ─── Quick Stats Grid ─── */}

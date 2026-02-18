@@ -87,6 +87,8 @@ export interface SiteInstance {
   deployedUrl?: string;
   deploymentStatus?: 'draft' | 'deployed';
   customDomain?: string;
+  customHostnameId?: string;
+  domainStatus?: 'pending' | 'active';
   domainOrderId?: string;
   subdomain?: string;
   lastPublishedAt?: number;
