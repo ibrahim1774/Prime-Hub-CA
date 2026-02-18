@@ -55,7 +55,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         body: JSON.stringify({
           hostname: domain.toLowerCase(),
           ssl: {
-            method: 'http',
+            method: 'txt',
             type: 'dv',
             settings: {
               min_tls_version: '1.2',

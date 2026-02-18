@@ -430,7 +430,7 @@ const DomainManager: React.FC<DomainManagerProps> = ({ site, onSiteUpdated }) =>
               {site.sslTxtValue && (
                 <tr>
                   <td className="py-2 pr-4">TXT</td>
-                  <td className="py-2 pr-4">_acme-challenge</td>
+                  <td className="py-2 pr-4 break-all text-xs">{site.sslTxtName}</td>
                   <td className="py-2 pr-4 break-all text-xs">{site.sslTxtValue}</td>
                   <td className="py-2">
                     <button
