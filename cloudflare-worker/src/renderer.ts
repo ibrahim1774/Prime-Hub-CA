@@ -105,7 +105,7 @@ function renderHero(data: GeneratedSiteData, brandColour: string): string {
   `).join('') || '';
 
   const statsBar = data.hero.stats && data.hero.stats.length > 0 ? `
-    <div class="relative z-10 bg-white/10 backdrop-blur-xl border-y border-white/10 py-4">
+    <div class="relative z-10 mt-auto bg-white/10 backdrop-blur-xl border-y border-white/10 py-4">
       <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
         ${statsHtml}
       </div>

@@ -308,7 +308,7 @@ const SiteRenderer: React.FC<SiteRendererProps> = ({ data, isEditMode, onUpdate 
         </div>
 
         {/* Hero Stats Bar */}
-        <div className="relative z-10 bg-white/10 backdrop-blur-xl border-y border-white/10 py-4">
+        <div className="relative z-10 mt-auto bg-white/10 backdrop-blur-xl border-y border-white/10 py-4">
           <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
             {data.hero.stats?.map((stat, idx) => (
               <div key={idx} className="flex flex-col items-center md:items-start text-center md:text-left">

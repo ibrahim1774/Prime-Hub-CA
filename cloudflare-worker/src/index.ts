@@ -8,6 +8,11 @@ export default {
     const url = new URL(request.url);
     const hostname = url.hostname;
 
+    // Allow ACME challenge for SSL certificate validation
+    if (url.pathname.startsWith("/.well-known/")) {
+      return new Response("", { status: 200 });
+    }
+
     // Root domain redirect
     if (hostname === 'ablarme.com' || hostname === 'www.ablarme.com') {
       return Response.redirect(env.MAIN_APP_URL, 301);
