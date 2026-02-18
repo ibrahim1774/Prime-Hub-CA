@@ -76,35 +76,30 @@ export const loadUserSite = async (userId?: string): Promise<SiteInstance | null
 
 /**
  * Migrate a local IndexedDB site to Supabase for a newly signed-up user.
- * Checks for duplicates before inserting.
+ * Uses a server-side endpoint that has the service role key to bypass RLS,
+ * since the client-side anon key can't access rows where user_id is null.
  */
 export const migrateSiteToUser = async (site: SiteInstance, userId: string): Promise<void> => {
-  // Check if already exists in Supabase
-  const { data: existing } = await supabase
-    .from('sites')
-    .select('id, user_id')
-    .eq('id', site.id)
-    .maybeSingle();
+  try {
+    // Use server-side endpoint (has service role key, bypasses RLS)
+    const response = await fetch('/api/claim-site', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ siteId: site.id, userId }),
+    });
 
-  if (existing) {
-    if (!existing.user_id) {
-      // Site was deployed anonymously (post-payment before account creation) — claim it
-      const { error } = await supabase
-        .from('sites')
-        .update({ user_id: userId, updated_at: new Date().toISOString() })
-        .eq('id', site.id);
-      if (error) console.error('[SiteService] Failed to claim site:', error);
-      else console.log('[SiteService] Claimed anonymous site for user:', userId);
+    if (response.ok) {
+      console.log('[SiteService] Site claimed for user:', userId);
     } else {
-      console.log('[SiteService] Site already exists in Supabase, skipping migration');
+      const err = await response.json();
+      console.error('[SiteService] Server-side claim failed:', err);
     }
-    return;
+  } catch (err) {
+    console.error('[SiteService] Migration failed:', err);
   }
 
-  // Save with user_id
-  const siteWithUser = { ...site, user_id: userId };
-  await saveSite(siteWithUser, userId);
-  console.log('[SiteService] Site migrated to Supabase for user:', userId);
+  // Always save to IndexedDB with user association
+  await saveSiteInstance({ ...site, user_id: userId });
 };
 
 /**
