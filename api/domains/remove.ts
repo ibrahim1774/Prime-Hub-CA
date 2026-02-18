@@ -54,6 +54,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .update({
         custom_domain: null,
         custom_hostname_id: null,
+        ssl_txt_name: null,
+        ssl_txt_value: null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', siteId);

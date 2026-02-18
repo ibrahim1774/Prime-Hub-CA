@@ -89,6 +89,8 @@ export interface SiteInstance {
   customDomain?: string;
   customHostnameId?: string;
   domainStatus?: 'pending' | 'active';
+  sslTxtName?: string;
+  sslTxtValue?: string;
   domainOrderId?: string;
   subdomain?: string;
   lastPublishedAt?: number;

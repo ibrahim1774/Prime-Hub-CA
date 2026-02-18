@@ -74,6 +74,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const customHostnameId = cfData.result.id;
+    const txtName = cfData.result.ssl?.txt_name || '';
+    const txtValue = cfData.result.ssl?.txt_value || '';
 
     // 3. Save to Supabase
     const { error: updateError } = await supabase
@@ -81,6 +83,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .update({
         custom_domain: domain.toLowerCase(),
         custom_hostname_id: customHostnameId,
+        ssl_txt_name: txtName || null,
+        ssl_txt_value: txtValue || null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', siteId);
@@ -95,6 +99,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({
       success: true,
       customHostnameId,
+      txtName,
+      txtValue,
     });
   } catch (error: any) {
     console.error('[domains/connect] Error:', error);

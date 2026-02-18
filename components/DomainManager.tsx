@@ -146,6 +146,8 @@ const DomainManager: React.FC<DomainManagerProps> = ({ site, onSiteUpdated }) =>
         ...site,
         customDomain: domain,
         customHostnameId: data.customHostnameId,
+        sslTxtName: data.txtName || undefined,
+        sslTxtValue: data.txtValue || undefined,
         domainStatus: 'pending',
       });
     } catch (err: any) {
@@ -199,6 +201,8 @@ const DomainManager: React.FC<DomainManagerProps> = ({ site, onSiteUpdated }) =>
         ...site,
         customDomain: undefined,
         customHostnameId: undefined,
+        sslTxtName: undefined,
+        sslTxtValue: undefined,
         domainStatus: undefined,
       });
     } catch (err: any) {
@@ -398,10 +402,10 @@ const DomainManager: React.FC<DomainManagerProps> = ({ site, onSiteUpdated }) =>
               <tr>
                 <td className="py-2 pr-4">CNAME</td>
                 <td className="py-2 pr-4">www</td>
-                <td className="py-2 pr-4">ablarme.com</td>
+                <td className="py-2 pr-4">fallback-origin.ablarme.com</td>
                 <td className="py-2">
                   <button
-                    onClick={() => handleCopy('ablarme.com', 'www')}
+                    onClick={() => handleCopy('fallback-origin.ablarme.com', 'www')}
                     className="text-gray-500 hover:text-gray-300 transition-colors p-1"
                     title="Copy"
                   >
@@ -412,10 +416,10 @@ const DomainManager: React.FC<DomainManagerProps> = ({ site, onSiteUpdated }) =>
               <tr>
                 <td className="py-2 pr-4">CNAME</td>
                 <td className="py-2 pr-4">@</td>
-                <td className="py-2 pr-4">ablarme.com</td>
+                <td className="py-2 pr-4">fallback-origin.ablarme.com</td>
                 <td className="py-2">
                   <button
-                    onClick={() => handleCopy('ablarme.com', 'root')}
+                    onClick={() => handleCopy('fallback-origin.ablarme.com', 'root')}
                     className="text-gray-500 hover:text-gray-300 transition-colors p-1"
                     title="Copy"
                   >
@@ -423,6 +427,22 @@ const DomainManager: React.FC<DomainManagerProps> = ({ site, onSiteUpdated }) =>
                   </button>
                 </td>
               </tr>
+              {site.sslTxtValue && (
+                <tr>
+                  <td className="py-2 pr-4">TXT</td>
+                  <td className="py-2 pr-4">_acme-challenge</td>
+                  <td className="py-2 pr-4 break-all text-xs">{site.sslTxtValue}</td>
+                  <td className="py-2">
+                    <button
+                      onClick={() => handleCopy(site.sslTxtValue!, 'txt')}
+                      className="text-gray-500 hover:text-gray-300 transition-colors p-1"
+                      title="Copy"
+                    >
+                      {copiedField === 'txt' ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
+                    </button>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
