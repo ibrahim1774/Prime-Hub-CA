@@ -1,0 +1,14 @@
+name = "ablarme"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+MAIN_APP_URL = "https://prime-hub-ca.vercel.app"
+
+[[kv_namespaces]]
+binding = "SITE_CACHE"
+id = "90c94292ec394e9baca2bb4d3e17330e"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "ablarme-images"

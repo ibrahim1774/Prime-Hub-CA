@@ -196,11 +196,10 @@ const Dashboard: React.FC<DashboardProps> = ({ site, onEditSite, onSignOut, onSi
 
         {/* ─── Domain Manager ─── */}
         {site && isLive && (
-          <DomainManager site={site} onDomainConnected={(domain, orderId) => {
+          <DomainManager site={site} onDomainConnected={(domain) => {
             const updatedSite: SiteInstance = {
               ...site,
               customDomain: domain,
-              domainOrderId: orderId,
               lastSaved: Date.now(),
             };
             onSiteUpdated(updatedSite);
@@ -236,7 +235,11 @@ const Dashboard: React.FC<DashboardProps> = ({ site, onEditSite, onSignOut, onSi
             <div className="flex items-center gap-3">
               <Clock size={20} className="text-gray-400" />
               <span className="text-lg font-bold">
-                {isLive ? getRelativeTime(site!.lastSaved) : 'Not yet published'}
+                {isLive && site!.lastPublishedAt
+                  ? getRelativeTime(site!.lastPublishedAt)
+                  : isLive
+                    ? getRelativeTime(site!.lastSaved)
+                    : 'Not yet published'}
               </span>
             </div>
           </div>

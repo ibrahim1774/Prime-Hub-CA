@@ -2,6 +2,16 @@ import { SiteInstance } from '../types.js';
 import { saveSiteInstance, getAllSites } from './storageService.js';
 import { supabase } from './supabaseService.js';
 
+function generateSubdomain(companyName: string): string {
+  return companyName
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .substring(0, 63);
+}
+
 /**
  * Save site to IndexedDB first (instant), then Supabase (async, fire-and-forget) if userId provided.
  */
@@ -26,6 +36,7 @@ export const saveSite = async (site: SiteInstance, userId?: string): Promise<voi
         deployment_status: site.deploymentStatus || 'draft',
         custom_domain: site.customDomain || null,
         domain_order_id: site.domainOrderId || null,
+        subdomain: generateSubdomain(site.data.contact.companyName),
         updated_at: new Date().toISOString(),
       })
       .then(({ error }) => {
@@ -71,12 +82,22 @@ export const migrateSiteToUser = async (site: SiteInstance, userId: string): Pro
   // Check if already exists in Supabase
   const { data: existing } = await supabase
     .from('sites')
-    .select('id')
+    .select('id, user_id')
     .eq('id', site.id)
-    .single();
+    .maybeSingle();
 
   if (existing) {
-    console.log('[SiteService] Site already exists in Supabase, skipping migration');
+    if (!existing.user_id) {
+      // Site was deployed anonymously (post-payment before account creation) — claim it
+      const { error } = await supabase
+        .from('sites')
+        .update({ user_id: userId, updated_at: new Date().toISOString() })
+        .eq('id', site.id);
+      if (error) console.error('[SiteService] Failed to claim site:', error);
+      else console.log('[SiteService] Claimed anonymous site for user:', userId);
+    } else {
+      console.log('[SiteService] Site already exists in Supabase, skipping migration');
+    }
     return;
   }
 
@@ -106,5 +127,7 @@ function mapSupabaseToSiteInstance(row: any): SiteInstance {
     deploymentStatus: row.deployment_status || 'draft',
     customDomain: row.custom_domain,
     domainOrderId: row.domain_order_id,
+    subdomain: row.subdomain || undefined,
+    lastPublishedAt: row.last_published_at ? new Date(row.last_published_at).getTime() : undefined,
   };
 }

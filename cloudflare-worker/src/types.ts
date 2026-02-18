@@ -1,11 +1,6 @@
+// --- Copied from main app types.ts ---
 
 export interface ServiceCard {
-  title: string;
-  description: string;
-  icon: string;
-}
-
-export interface BenefitCard {
   title: string;
   description: string;
   icon: string;
@@ -75,40 +70,39 @@ export interface GeneratedSiteData {
     phone: string;
     location: string;
     companyName: string;
-  }
+  };
 }
 
-export interface SiteInstance {
+// --- Worker-specific types ---
+
+export interface SiteRow {
   id: string;
-  data: GeneratedSiteData;
-  lastSaved: number;
-  user_id?: string;
-  formInputs?: GeneratorInputs;
-  deployedUrl?: string;
-  deploymentStatus?: 'draft' | 'deployed';
-  customDomain?: string;
-  domainOrderId?: string;
-  subdomain?: string;
-  lastPublishedAt?: number;
-}
-
-export interface GeneratorInputs {
+  user_id: string;
+  company_name: string;
   industry: string;
-  companyName: string;
-  location: string;
+  service_area: string;
   phone: string;
-  brandColor: string;
-}
-
-export interface UserProfile {
-  id: string;
-  email: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  stripe_customer_id: string | null;
-  subscription_status: 'none' | 'active' | 'past_due' | 'cancelled';
-  created_at: string;
+  brand_colour: string;
+  site_data: GeneratedSiteData;
+  deployed_url: string | null;
+  deployment_status: string;
+  custom_domain: string | null;
+  domain_order_id: string | null;
+  subdomain: string | null;
   updated_at: string;
 }
 
-export type AppView = 'generator' | 'editor' | 'dashboard';
+export interface SectionConfig {
+  id: string;
+  visible: boolean;
+  order: number;
+}
+
+export interface Env {
+  SITE_CACHE: KVNamespace;
+  IMAGES: R2Bucket;
+  SUPABASE_URL: string;
+  SUPABASE_ANON_KEY: string;
+  PURGE_SECRET: string;
+  MAIN_APP_URL: string;
+}

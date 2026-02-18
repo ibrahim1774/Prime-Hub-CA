@@ -133,27 +133,25 @@ const App: React.FC = () => {
         const latestSite = sites.sort((a, b) => b.lastSaved - a.lastSaved)[0];
         setActiveSite(latestSite);
 
-        // Deploy it
-        const { generateSlug } = await import('./services/urlService.js');
-        const projectName = generateSlug(latestSite.data.contact.companyName);
+        // Deploy via Cloudflare Worker pipeline
+        setDeploymentMessage('Uploading assets and deploying your site...');
+        const { url: finalUrl, subdomain, updatedData } = await deploySite(latestSite, user?.id);
 
-        setDeploymentMessage('Building and deploying your site to Vercel...');
-        await deploySite(latestSite.data, projectName);
-
-        // 10-second countdown
-        for (let i = 10; i > 0; i--) {
-          setDeploymentMessage(`Deploying... ${i}s`);
+        // 3-second countdown
+        for (let i = 3; i > 0; i--) {
+          setDeploymentMessage(`Almost there... ${i}s`);
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
-
-        const finalUrl = `https://${projectName}.vercel.app`;
 
         // Update site with deployment info
         const deployedSite: SiteInstance = {
           ...latestSite,
+          data: updatedData,
           deployedUrl: finalUrl,
           deploymentStatus: 'deployed',
+          subdomain,
           lastSaved: Date.now(),
+          lastPublishedAt: Date.now(),
         };
         setActiveSite(deployedSite);
         setDeploymentUrl(finalUrl);
@@ -182,43 +180,6 @@ const App: React.FC = () => {
 
     checkPaymentAndDeploy();
   }, []);
-
-  // ─── Handle domain payment success ───
-  useEffect(() => {
-    const checkDomainPayment = async () => {
-      const params = new URLSearchParams(window.location.search);
-      if (!params.has('domain_payment') || params.get('domain_payment') !== 'success') return;
-
-      const sessionId = params.get('session_id');
-      window.history.replaceState({}, '', window.location.pathname);
-
-      if (!sessionId || !activeSite) return;
-
-      try {
-        const response = await fetch('api/purchase-domain', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId }),
-        });
-
-        if (!response.ok) throw new Error('Domain purchase failed');
-        const { domain, orderId } = await response.json();
-
-        const updatedSite: SiteInstance = {
-          ...activeSite,
-          customDomain: domain,
-          domainOrderId: orderId,
-          lastSaved: Date.now(),
-        };
-        setActiveSite(updatedSite);
-        await saveSite(updatedSite, user?.id);
-      } catch (err) {
-        console.error('[Domain] Purchase failed:', err);
-      }
-    };
-
-    checkDomainPayment();
-  }, [activeSite?.id]);
 
   // ─── Navigation helpers ───
   const navigateToDashboard = useCallback(() => {
@@ -409,30 +370,29 @@ const App: React.FC = () => {
     setDeploymentMessage('Publishing your changes...');
 
     try {
-      const { generateSlug } = await import('./services/urlService.js');
-      const projectName = generateSlug(activeSite.data.contact.companyName);
+      // Phase 3: Deploy via Cloudflare Worker pipeline
+      setDeploymentMessage('Publishing your site...');
+      const { url: finalUrl, subdomain, updatedData } = await deploySite(activeSite, user?.id);
 
-      // Phase 3: Deploy
-      setDeploymentMessage('Building and deploying your site...');
-      await deploySite(activeSite.data, projectName);
-
-      // Phase 4: 3-second countdown
-      for (let i = 3; i > 0; i--) {
+      // Phase 4: 2-second countdown
+      for (let i = 2; i > 0; i--) {
         setDeploymentMessage(`Almost there... ${i}s`);
         await new Promise(r => setTimeout(r, 1000));
       }
 
       // Phase 5: Success
-      const finalUrl = `https://${projectName}.vercel.app`;
       setDeploymentStatus('success');
       setDeploymentUrl(finalUrl);
       setDeploymentMessage('Changes published successfully!');
 
       const updatedSite: SiteInstance = {
         ...activeSite,
+        data: updatedData,
         deployedUrl: finalUrl,
         deploymentStatus: 'deployed',
+        subdomain,
         lastSaved: Date.now(),
+        lastPublishedAt: Date.now(),
       };
       setActiveSite(updatedSite);
       await saveSite(updatedSite, user?.id);
