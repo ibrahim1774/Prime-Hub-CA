@@ -74,8 +74,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const customHostnameId = cfData.result.id;
-    const txtName = cfData.result.ssl?.txt_name || '';
-    const txtValue = cfData.result.ssl?.txt_value || '';
+
+    // Extract TXT validation records from validation_records array
+    let txtName = cfData.result.ssl?.validation_records?.[0]?.txt_name || '';
+    let txtValue = cfData.result.ssl?.validation_records?.[0]?.txt_value || '';
+
+    // POST response may not include validation_records immediately — retry with GET
+    if (!txtValue && customHostnameId) {
+      await new Promise(r => setTimeout(r, 2000));
+      const getResp = await fetch(
+        `https://api.cloudflare.com/client/v4/zones/${process.env.CLOUDFLARE_ZONE_ID}/custom_hostnames/${customHostnameId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      const getData = await getResp.json();
+      if (getData.success) {
+        txtName = getData.result.ssl?.validation_records?.[0]?.txt_name || '';
+        txtValue = getData.result.ssl?.validation_records?.[0]?.txt_value || '';
+      }
+    }
+
+    console.log(`[domains/connect] TXT validation: name=${txtName}, value=${txtValue ? 'present' : 'empty'}`);
 
     // 3. Save to Supabase
     const { error: updateError } = await supabase
