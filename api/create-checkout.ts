@@ -20,12 +20,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             line_items: [
                 {
                     price_data: {
-                        currency: 'usd',
+                        currency: 'cad',
                         product_data: {
                             name: `Website Hosting: ${safeCompanyName}`,
                             description: `Professional hosting and maintenance for your custom generated website.`,
                         },
-                        unit_amount: 1000, // $10.00
+                        unit_amount: 1400, // $14.00 CAD
                         recurring: {
                             interval: 'month',
                         },

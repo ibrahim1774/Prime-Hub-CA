@@ -109,8 +109,8 @@ const App: React.FC = () => {
       // Fire Facebook Pixel Purchase Event (client-side) with eventID for dedup
       if (window.fbq) {
         window.fbq('track', 'Purchase', {
-          value: parseFloat(import.meta.env.VITE_PURCHASE_VALUE || '10.00'),
-          currency: import.meta.env.VITE_PURCHASE_CURRENCY || 'USD'
+          value: parseFloat(import.meta.env.VITE_PURCHASE_VALUE || '14.00'),
+          currency: import.meta.env.VITE_PURCHASE_CURRENCY || 'CAD'
         }, { eventID: eventId });
       }
 
@@ -551,7 +551,7 @@ const App: React.FC = () => {
                 {/* Pricing + deploy button */}
                 <div className="flex flex-col md:flex-row items-center justify-center gap-3">
                   <p className="text-black font-bold text-sm uppercase tracking-tight text-center">
-                    PAY ONLY $10/MONTH WEBSITE HOSTING TO HAVE YOUR CUSTOM SITE LIVE & ACTIVE
+                    PAY ONLY $14/MONTH WEBSITE HOSTING TO HAVE YOUR CUSTOM SITE LIVE & ACTIVE
                   </p>
                   <button
                     onClick={handleDeploy}
