@@ -72,6 +72,13 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // ─── Reset stale deploying state (e.g. browser back from Stripe checkout) ───
+  useEffect(() => {
+    if (deploymentStatus === 'deploying' && !window.location.search.includes('payment=success')) {
+      setDeploymentStatus('idle');
+    }
+  }, []);
+
   // ─── Restore view + site from sessionStorage on mount ───
   useEffect(() => {
     const restore = async () => {
