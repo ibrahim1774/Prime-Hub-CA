@@ -348,7 +348,7 @@ const App: React.FC = () => {
   }, [activeSite, user?.id]);
 
   // ─── Pre-payment deploy (checkout) ───
-  const handleDeploy = async () => {
+  const handleDeploy = async (plan: 'monthly' | 'yearly' = 'monthly') => {
     if (!activeSite) return;
     setSaveStatus('saving');
     await saveSiteInstance(activeSite);
@@ -361,7 +361,7 @@ const App: React.FC = () => {
       const response = await fetch('api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ companyName: activeSite.data.contact.companyName, siteId: activeSite.id }),
+        body: JSON.stringify({ companyName: activeSite.data.contact.companyName, siteId: activeSite.id, plan }),
       });
 
       if (!response.ok) {

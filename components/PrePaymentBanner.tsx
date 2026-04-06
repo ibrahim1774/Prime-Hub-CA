@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { X, ArrowRight, Rocket, Loader2 } from 'lucide-react';
 
+type PricingPlan = 'monthly' | 'yearly';
+
 interface PrePaymentBannerProps {
-  onDeploy: () => void;
+  onDeploy: (plan: PricingPlan) => void;
   isDeploying: boolean;
   industry?: string;
 }
@@ -11,6 +13,37 @@ const PrePaymentBanner: React.FC<PrePaymentBannerProps> = ({ onDeploy, isDeployi
   const [isDismissed, setIsDismissed] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
+  const [pricingPlan, setPricingPlan] = useState<PricingPlan>('monthly');
+
+  const priceLabel = pricingPlan === 'monthly' ? '$14/mo' : '$69/yr';
+
+  const PricingToggle = () => (
+    <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1 mb-3">
+      <button
+        onClick={() => setPricingPlan('monthly')}
+        className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+          pricingPlan === 'monthly'
+            ? 'bg-blue-600 text-white shadow-lg'
+            : 'text-gray-400 hover:text-white'
+        }`}
+      >
+        Monthly
+      </button>
+      <button
+        onClick={() => setPricingPlan('yearly')}
+        className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all relative ${
+          pricingPlan === 'yearly'
+            ? 'bg-blue-600 text-white shadow-lg'
+            : 'text-gray-400 hover:text-white'
+        }`}
+      >
+        Yearly
+        <span className="absolute -top-2 -right-1 bg-green-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+          Save 59%
+        </span>
+      </button>
+    </div>
+  );
 
   const displayIndustry = industry || 'home service';
 
@@ -57,9 +90,18 @@ const PrePaymentBanner: React.FC<PrePaymentBannerProps> = ({ onDeploy, isDeployi
               <div className="absolute inset-0 w-2.5 h-2.5 bg-blue-500 rounded-full animate-ping" />
             </div>
             <p className="text-gray-300 text-sm leading-relaxed">
-              Just pay for hosting—it's <span className="text-white font-bold">$14/month</span>. You can make an account after publishing the site and change the text and images as well.
+              Just pay for hosting—it's{' '}
+              <span className="text-white font-bold">
+                {pricingPlan === 'monthly' ? '$14/month' : '$69/year'}
+              </span>
+              {pricingPlan === 'yearly' && (
+                <span className="text-gray-500 line-through ml-1 text-xs">$168/yr</span>
+              )}
+              . You can make an account after publishing the site and change the text and images as well.
             </p>
           </div>
+
+          <PricingToggle />
 
           <div className="flex items-center gap-3">
             <button
@@ -70,7 +112,7 @@ const PrePaymentBanner: React.FC<PrePaymentBannerProps> = ({ onDeploy, isDeployi
             </button>
 
             <button
-              onClick={onDeploy}
+              onClick={() => onDeploy(pricingPlan)}
               disabled={isDeploying}
               className="flex-1 py-2.5 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-1.5 shadow-lg shadow-blue-500/20 hover:opacity-90 active:scale-[0.97] transition-all uppercase tracking-wider disabled:opacity-50"
               style={{
@@ -82,7 +124,7 @@ const PrePaymentBanner: React.FC<PrePaymentBannerProps> = ({ onDeploy, isDeployi
               ) : (
                 <Rocket size={14} />
               )}
-              Publish — $14/mo
+              Publish — {priceLabel}
             </button>
           </div>
         </div>
@@ -121,8 +163,11 @@ const PrePaymentBanner: React.FC<PrePaymentBannerProps> = ({ onDeploy, isDeployi
             <h2 className="text-xl md:text-2xl font-bold text-white mb-1 leading-tight">
               Your Fully Custom Website —{' '}
               <span style={{ fontFamily: '"Instrument Serif", serif' }} className="text-blue-400">
-                Just $14/mo
+                Just {priceLabel}
               </span>
+              {pricingPlan === 'yearly' && (
+                <span className="text-gray-500 line-through text-base ml-1">$168/yr</span>
+              )}
             </h2>
 
             <p className="text-gray-400 text-sm mb-3 leading-relaxed">
@@ -173,9 +218,17 @@ const PrePaymentBanner: React.FC<PrePaymentBannerProps> = ({ onDeploy, isDeployi
               </div>
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-xl p-2 px-3 mt-1.5 flex items-center justify-between gap-2">
+            <div className="mt-2">
+              <PricingToggle />
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-xl p-2 px-3 flex items-center justify-between gap-2">
               <p className="text-white font-bold text-sm shrink-0" style={{ fontFamily: '"Instrument Serif", serif' }}>
-                $14/mo —{' '}
+                {priceLabel}
+                {pricingPlan === 'yearly' && (
+                  <span className="text-gray-500 line-through text-xs ml-1 font-normal">$168/yr</span>
+                )}
+                {' '}—{' '}
                 <span className="text-gray-400 font-normal text-xs" style={{ fontFamily: '"DM Sans", sans-serif' }}>
                   hosting only
                 </span>
@@ -190,7 +243,7 @@ const PrePaymentBanner: React.FC<PrePaymentBannerProps> = ({ onDeploy, isDeployi
             </div>
 
             <button
-              onClick={() => { setShowHowItWorks(false); onDeploy(); }}
+              onClick={() => { setShowHowItWorks(false); onDeploy(pricingPlan); }}
               disabled={isDeploying}
               className="w-full mt-2 py-3 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 hover:opacity-90 active:scale-[0.97] transition-all uppercase tracking-wider disabled:opacity-50"
               style={{
@@ -201,7 +254,7 @@ const PrePaymentBanner: React.FC<PrePaymentBannerProps> = ({ onDeploy, isDeployi
                 <Loader2 className="animate-spin" size={18} />
               ) : (
                 <>
-                  Publish My Site — $14/mo
+                  Publish My Site — {priceLabel}
                   <ArrowRight size={18} />
                 </>
               )}
