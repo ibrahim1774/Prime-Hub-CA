@@ -15,7 +15,7 @@ const PrePaymentBanner: React.FC<PrePaymentBannerProps> = ({ onDeploy, isDeployi
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [pricingPlan, setPricingPlan] = useState<PricingPlan>('monthly');
 
-  const priceLabel = pricingPlan === 'monthly' ? '$14/mo' : '$69/yr';
+  const priceLabel = pricingPlan === 'monthly' ? '$14/mo' : '$99/yr';
 
   const PricingToggle = () => (
     <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1 mb-3">
@@ -39,7 +39,7 @@ const PrePaymentBanner: React.FC<PrePaymentBannerProps> = ({ onDeploy, isDeployi
       >
         Yearly
         <span className="absolute -top-2 -right-1 bg-green-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">
-          Save 59%
+          Save 40%
         </span>
       </button>
     </div>

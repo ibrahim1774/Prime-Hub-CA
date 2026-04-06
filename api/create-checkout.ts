@@ -10,7 +10,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const { companyName, siteId, plan = 'monthly' } = req.body || {};
     const isYearly = plan === 'yearly';
-    const unitAmount = isYearly ? 6900 : 1400; // $69/yr or $14/mo CAD
+    const unitAmount = isYearly ? 9900 : 1400; // $99/yr or $14/mo CAD
     const interval = isYearly ? 'year' : 'month';
 
     console.log(`[Stripe Checkout] Creating session for: ${companyName || 'Unknown'} (Site: ${siteId || 'N/A'})`);
