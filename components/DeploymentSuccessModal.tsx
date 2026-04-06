@@ -26,7 +26,7 @@ const DeploymentSuccessModal: React.FC<DeploymentSuccessModalProps> = ({
 
         {/* Heading */}
         <h3 className="text-2xl font-bold text-white mb-2">Site is Live!</h3>
-        <p className="text-gray-400 mb-6">Your website has been deployed successfully.</p>
+        <p className="text-gray-400 mb-6">Your website has been published successfully.</p>
 
         {/* View Live Site button */}
         <a
